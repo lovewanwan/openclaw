@@ -153,3 +153,6 @@ extensions/qa-lab/web/dist/
 openclaw-api.tar
 .vscode/
 node_modules/
+openclaw-api.tar*
+.vscode/
+node_modules/
