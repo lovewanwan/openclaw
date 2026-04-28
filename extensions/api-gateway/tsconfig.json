@@ -1,0 +1,8 @@
+{
+  "extends": "../tsconfig.package-boundary.base.json",
+  "compilerOptions": {
+    "rootDir": "."
+  },
+  "include": ["./*.ts", "./middleware/**/*.ts", "./routes/**/*.ts", "./services/**/*.ts"],
+  "exclude": ["./**/*.test.ts", "./dist/**", "./node_modules/**"]
+}

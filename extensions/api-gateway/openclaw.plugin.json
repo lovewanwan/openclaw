@@ -1,0 +1,6 @@
+{
+  "id": "api-gateway",
+  "enabledByDefault": false,
+  "name": "API Gateway",
+  "description": "Standalone RESTful API gateway for OpenClaw runtime integration."
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@openclaw/api-gateway",
+  "version": "2026.4.20",
+  "description": "OpenClaw RESTful API gateway plugin",
+  "type": "module",
+  "dependencies": {
+    "express-rate-limit": "^7.5.0",
+    "ip-range-check": "^0.2.0"
+  },
+  "devDependencies": {
+    "@openclaw/plugin-sdk": "workspace:*",
+    "@types/express": "^5.0.6"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}
