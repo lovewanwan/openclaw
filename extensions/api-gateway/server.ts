@@ -42,9 +42,9 @@ export function createApiGatewayService(runtime: PluginRuntime): OpenClawPluginS
         next();
       });
 
-      app.options("*", (_req, res) => {
-        res.sendStatus(204);
-      });
+      //app.options("*", (_req, res) => {
+       // res.sendStatus(204);
+      //});
 
       // Health check — no auth
       const publicRouter = express.Router();
@@ -65,15 +65,16 @@ export function createApiGatewayService(runtime: PluginRuntime): OpenClawPluginS
       app.use("/api", apiRouter);
 
       const port = resolvePort();
+      const host = process.env["API_GATEWAY_HOST"] || "0.0.0.0";
       await new Promise<void>((resolve, reject) => {
-        const srv = app.listen(port, () => {
+        const srv = app.listen(port, host, () => {
           server = srv;
           resolve();
         });
         srv.once("error", reject);
       });
 
-      logger.info(`[api-gateway] listening on port ${port}`);
+      logger.info(`[api-gateway] listening on ${host}:${port}`);
     },
 
     async stop(ctx: OpenClawPluginServiceContext) {

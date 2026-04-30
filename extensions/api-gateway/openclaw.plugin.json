@@ -1,6 +1,50 @@
 {
   "id": "api-gateway",
-  "enabledByDefault": false,
+  "enabledByDefault": true,
   "name": "API Gateway",
-  "description": "Standalone RESTful API gateway for OpenClaw runtime integration."
+  "description": "Standalone RESTful API gateway for OpenClaw runtime integration.",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "port": {
+        "type": "number",
+        "default": 3099,
+        "description": "HTTP server port (can also be set via API_GATEWAY_PORT env var)"
+      },
+      "host": {
+        "type": "string",
+        "default": "0.0.0.0",
+        "description": "HTTP server bind address (can also be set via API_GATEWAY_HOST env var)"
+      },
+      "apiKey": {
+        "type": "string",
+        "description": "API key for x-api-key header authentication (can also be set via API_GATEWAY_KEY env var)"
+      },
+      "corsOrigin": {
+        "type": "string",
+        "default": "*",
+        "description": "CORS allowed origin (can also be set via CORS_ORIGIN env var)"
+      },
+      "ipWhitelist": {
+        "type": "string",
+        "description": "Comma-separated CIDR ranges for IP whitelist (can also be set via API_GATEWAY_IP_WHITELIST env var)"
+      },
+      "rateLimit": {
+        "type": "number",
+        "default": 60,
+        "description": "Max requests per minute per IP (can also be set via API_GATEWAY_RATE_LIMIT env var)"
+      },
+      "agentTimeoutMs": {
+        "type": "number",
+        "default": 300000,
+        "description": "Agent execution timeout in milliseconds (can also be set via AGENT_TIMEOUT_MS env var)"
+      },
+      "taskTtlMs": {
+        "type": "number",
+        "default": 300000,
+        "description": "Async task result TTL in milliseconds (can also be set via TASK_TTL_MS env var)"
+      }
+    }
+  }
 }
