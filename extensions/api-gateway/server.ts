@@ -9,6 +9,7 @@ import { registerSkillsRoute } from "./routes/skills.js";
 import { registerMcpRoute } from "./routes/mcp.js";
 import { registerAgentRoute } from "./routes/agent.js";
 import { registerTaskRoute } from "./routes/task.js";
+import { registerStreamRoute } from "./routes/stream.js";
 import { cleanupAllTasks } from "./services/taskManager.js";
 
 function resolvePort(): number {
@@ -60,6 +61,7 @@ export function createApiGatewayService(runtime: PluginRuntime): OpenClawPluginS
       registerSkillsRoute(apiRouter, runtime, logger);
       registerMcpRoute(apiRouter, runtime, logger);
       registerAgentRoute(apiRouter, runtime, logger);
+      registerStreamRoute(apiRouter, runtime, logger);
       registerTaskRoute(apiRouter);
 
       app.use("/api", apiRouter);

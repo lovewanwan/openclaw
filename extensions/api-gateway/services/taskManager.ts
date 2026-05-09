@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { PluginLogger } from "../runtime-api.js";
 
-export type TaskStatus = "pending" | "running" | "done" | "error";
+export type TaskStatus = "pending" | "running" | "completed" | "failed";
 
 export type TaskEntry = {
   id: string;
@@ -43,7 +43,7 @@ export function markTaskDone(taskId: string, result: unknown, ttlMs: number): vo
   if (!task) {
     return;
   }
-  task.status = "done";
+  task.status = "completed";
   task.result = result;
   scheduleCleanup(task, ttlMs);
 }
@@ -53,7 +53,7 @@ export function markTaskError(taskId: string, error: string, ttlMs: number): voi
   if (!task) {
     return;
   }
-  task.status = "error";
+  task.status = "failed";
   task.error = error;
   scheduleCleanup(task, ttlMs);
 }

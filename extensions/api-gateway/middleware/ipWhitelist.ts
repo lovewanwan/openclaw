@@ -31,7 +31,7 @@ export function createIpWhitelistMiddleware(logger: PluginLogger) {
     const ip = resolveRequestIp(req);
     if (!ipRangeCheck(ip, ranges)) {
       logger.warn?.(`[api-gateway] ip whitelist rejected ${ip} on ${req.path}`);
-      res.status(403).json({ error: "Forbidden" });
+      res.status(403).json({ error: "Forbidden", code: "IP_NOT_WHITELISTED" });
       return;
     }
 

@@ -12,7 +12,7 @@ export function createAuthMiddleware(logger: PluginLogger) {
     const header = req.headers["x-api-key"];
     if (!header || header !== apiKey) {
       logger.warn?.(`[api-gateway] auth rejected from ${req.ip} on ${req.path}`);
-      res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: "Unauthorized", code: "INVALID_API_KEY" });
       return;
     }
     next();

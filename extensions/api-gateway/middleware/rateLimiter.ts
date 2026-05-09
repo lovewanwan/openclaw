@@ -17,6 +17,7 @@ export function createRateLimiter() {
     limit: resolveMaxPerMinute(),
     standardHeaders: true,
     legacyHeaders: false,
-    message: { error: "Too Many Requests" },
+    statusCode: 429,
+    message: { error: "Too Many Requests", code: "RATE_LIMIT_EXCEEDED" },
   });
 }

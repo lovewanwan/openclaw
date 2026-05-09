@@ -23,11 +23,11 @@ export function registerSkillsRoute(
         const result = await runtime.subagent.waitForRun({ runId, timeoutMs });
 
         if (result.status === "timeout") {
-          res.status(504).json({ error: "Skill execution timed out" });
+          res.status(504).json({ error: "Skill execution timed out", code: "TIMEOUT" });
           return;
         }
         if (result.status === "error") {
-          res.status(500).json({ error: result.error ?? "Skill execution failed" });
+          res.status(500).json({ error: result.error ?? "Skill execution failed", code: "EXECUTION_ERROR" });
           return;
         }
 
@@ -43,10 +43,10 @@ export function registerSkillsRoute(
         const msg = err instanceof Error ? err.message : String(err);
         logger.warn?.(`[api-gateway] skill ${skillName} failed: ${msg}`);
         if (msg.toLowerCase().includes("not found") || msg.toLowerCase().includes("unknown skill")) {
-          res.status(404).json({ error: `Skill not found: ${skillName}` });
+          res.status(404).json({ error: `Skill not found: ${skillName}`, code: "SKILL_NOT_FOUND" });
           return;
         }
-        res.status(500).json({ error: msg });
+        res.status(500).json({ error: msg, code: "INTERNAL_ERROR" });
       }
     })().catch(next);
   });

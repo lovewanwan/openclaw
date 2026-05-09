@@ -30,11 +30,11 @@ export function registerMcpRoute(
         const result = await runtime.subagent.waitForRun({ runId, timeoutMs: resolveAgentTimeoutMs() });
 
         if (result.status === "timeout") {
-          res.status(504).json({ error: "MCP tool execution timed out" });
+          res.status(504).json({ error: "MCP tool execution timed out", code: "TIMEOUT" });
           return;
         }
         if (result.status === "error") {
-          res.status(500).json({ error: result.error ?? "MCP tool execution failed" });
+          res.status(500).json({ error: result.error ?? "MCP tool execution failed", code: "EXECUTION_ERROR" });
           return;
         }
 
@@ -49,7 +49,11 @@ export function registerMcpRoute(
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         logger.warn?.(`[api-gateway] mcp ${serverName}/${toolName} failed: ${msg}`);
-        res.status(500).json({ error: msg });
+        if (msg.toLowerCase().includes("not found") || msg.toLowerCase().includes("unknown")) {
+          res.status(404).json({ error: `MCP tool not found: ${serverName}/${toolName}`, code: "TOOL_NOT_FOUND" });
+          return;
+        }
+        res.status(500).json({ error: msg, code: "INTERNAL_ERROR" });
       }
     })().catch(next);
   });
