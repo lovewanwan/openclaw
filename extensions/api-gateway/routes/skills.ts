@@ -38,7 +38,9 @@ export function registerSkillsRoute(
           (m: unknown) => (m as Record<string, unknown>)?.role === "assistant",
         );
 
-        res.json({ success: true, data: lastAssistant ?? { runId } });
+        const usage = extractTokenUsage(messages);
+
+        res.json({ success: true, data: lastAssistant ?? { runId }, usage });
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         logger.warn?.(`[api-gateway] skill ${skillName} failed: ${msg}`);
@@ -59,4 +61,19 @@ function resolveAgentTimeoutMs(): number {
     return 5 * 60 * 1000;
   }
   return parsed;
+}
+
+function extractTokenUsage(messages: unknown[]): { inputTokens: number; outputTokens: number } {
+  let inputTokens = 0;
+  let outputTokens = 0;
+  for (const msg of messages) {
+    const m = msg as Record<string, unknown>;
+    const usage = m?.usage as Record<string, unknown> | undefined;
+    if (!usage) { continue; }
+    const input = Number(usage.input ?? usage.inputTokens ?? 0);
+    const output = Number(usage.output ?? usage.outputTokens ?? 0);
+    if (Number.isFinite(input)) { inputTokens += input; }
+    if (Number.isFinite(output)) { outputTokens += output; }
+  }
+  return { inputTokens, outputTokens };
 }

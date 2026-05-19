@@ -10,6 +10,21 @@ function resolveAgentTimeoutMs(): number {
   return parsed;
 }
 
+function extractTokenUsage(messages: unknown[]): { inputTokens: number; outputTokens: number } {
+  let inputTokens = 0;
+  let outputTokens = 0;
+  for (const msg of messages) {
+    const m = msg as Record<string, unknown>;
+    const usage = m?.usage as Record<string, unknown> | undefined;
+    if (!usage) { continue; }
+    const input = Number(usage.input ?? usage.inputTokens ?? 0);
+    const output = Number(usage.output ?? usage.outputTokens ?? 0);
+    if (Number.isFinite(input)) { inputTokens += input; }
+    if (Number.isFinite(output)) { outputTokens += output; }
+  }
+  return { inputTokens, outputTokens };
+}
+
 export function registerStreamRoute(
   router: Router,
   runtime: PluginRuntime,
@@ -94,7 +109,12 @@ export function registerStreamRoute(
             const result = await runtime.subagent.waitForRun({ runId, timeoutMs: 100 });
 
             if (result.status === "ok") {
-              res.write(`data: ${JSON.stringify({ type: "complete" })}\n\n`);
+              const { messages: allMessages } = await runtime.subagent.getSessionMessages({
+                sessionKey,
+                limit: 100
+              });
+              const usage = extractTokenUsage(allMessages);
+              res.write(`data: ${JSON.stringify({ type: "complete", usage })}\n\n`);
               res.write("data: [DONE]\n\n");
               res.end();
               isComplete = true;

@@ -23,6 +23,23 @@ function resolveTaskTtlMs(): number {
   return parsed;
 }
 
+type TokenUsage = { inputTokens: number; outputTokens: number };
+
+function extractTokenUsage(messages: unknown[]): TokenUsage {
+  let inputTokens = 0;
+  let outputTokens = 0;
+  for (const msg of messages) {
+    const m = msg as Record<string, unknown>;
+    const usage = m?.usage as Record<string, unknown> | undefined;
+    if (!usage) { continue; }
+    const input = Number(usage.input ?? usage.inputTokens ?? 0);
+    const output = Number(usage.output ?? usage.outputTokens ?? 0);
+    if (Number.isFinite(input)) { inputTokens += input; }
+    if (Number.isFinite(output)) { outputTokens += output; }
+  }
+  return { inputTokens, outputTokens };
+}
+
 async function runAgent(
   runtime: PluginRuntime,
   sessionKey: string,
@@ -81,10 +98,8 @@ export function registerAgentRoute(
               const lastAssistant = [...result.messages].toReversed().find(
                 (m: unknown) => (m as Record<string, unknown>)?.role === "assistant",
               );
-              const resultText = lastAssistant
-                ? ((lastAssistant as Record<string, unknown>)?.content as string) || JSON.stringify(lastAssistant)
-                : "No result";
-              markTaskDone(task.id, { result: resultText, steps: result.steps || 0 }, ttlMs);
+              const usage = extractTokenUsage(result.messages);
+              markTaskDone(task.id, { data: lastAssistant ?? { messages: result.messages }, usage }, ttlMs);
             } else {
               markTaskError(task.id, result.error ?? result.status, ttlMs);
             }
@@ -115,17 +130,12 @@ export function registerAgentRoute(
           (m: unknown) => (m as Record<string, unknown>)?.role === "assistant",
         );
 
-        // Extract result text from the last assistant message
-        const resultText = lastAssistant
-          ? ((lastAssistant as Record<string, unknown>)?.content as string) || JSON.stringify(lastAssistant)
-          : "No result";
+        const usage = extractTokenUsage(result.messages);
 
         res.json({
           success: true,
-          data: {
-            result: resultText,
-            steps: result.steps || 0
-          }
+          data: lastAssistant ?? { messages: result.messages },
+          usage
         });
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
